@@ -1,6 +1,9 @@
+import os
+import secrets
 from decimal import Decimal
+from django.conf import settings
 from django.contrib.auth.models import Group, User
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from apps.sales.models import SaleProposalModel
 from apps.sales.repositories import DjangoSaleProposalRepository
@@ -12,41 +15,88 @@ from core.use_cases.vehicles import CreateVehicleUseCase
 
 
 class Command(BaseCommand):
-    help = "Popula o banco de dados com veículos e propostas realistas para demonstração"
+    help = "Popula o showroom com veículos e propostas para demonstração (exclusivo para desenvolvimento)"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--reset",
+            action="store_true",
+            help="Limpa explicitamente propostas e veículos existentes antes de popular (restrito a desenvolvimento).",
+        )
+        parser.add_argument(
+            "--manager-password",
+            type=str,
+            default=None,
+            help="Define a senha para o usuário gerente (se omitido, gera uma senha aleatória segura).",
+        )
+        parser.add_argument(
+            "--seller-password",
+            type=str,
+            default=None,
+            help="Define a senha para o usuário vendedor (se omitido, gera uma senha aleatória segura).",
+        )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING("Limpando dados antigos..."))
-        SaleProposalModel.objects.all().delete()
-        VehicleModel.objects.all().delete()
-        BrandModel.objects.all().delete()
+        # Proteção P0: Bloqueio absoluto em produção
+        if getattr(settings, "IS_PRODUCTION", False):
+            raise CommandError("O comando seed_drivehub é estritamente proibido em ambiente de produção.")
 
-        # Configura grupos de perfis de acesso
-        self.stdout.write(self.style.MIGRATE_HEADING("Configurando grupos e operadores..."))
+        should_reset = options["reset"]
+
+        # Proteção P0: Não apagar dados por padrão
+        if not should_reset and VehicleModel.objects.exists():
+            self.stdout.write(
+                self.style.WARNING(
+                    "O banco de dados já possui veículos cadastrados. Nenhuma alteração foi realizada.\n"
+                    "Para resetar e repopular os dados em ambiente local, execute novamente com a flag explícita: --reset"
+                )
+            )
+            return
+
+        if should_reset:
+            self.stdout.write(self.style.WARNING("Reset explícito solicitado: limpando propostas e veículos..."))
+            SaleProposalModel.objects.all().delete()
+            VehicleModel.objects.all().delete()
+            BrandModel.objects.all().delete()
+
+        # Proteção P0: Remoção de senhas fixas e geração segura
+        manager_password = (
+            options["manager_password"]
+            or os.environ.get("SEED_MANAGER_PASSWORD")
+            or secrets.token_urlsafe(16)
+        )
+        seller_password = (
+            options["seller_password"]
+            or os.environ.get("SEED_SELLER_PASSWORD")
+            or secrets.token_urlsafe(16)
+        )
+
+        self.stdout.write(self.style.MIGRATE_HEADING("Configurando grupos e operadores de desenvolvimento..."))
         manager_group, _ = Group.objects.get_or_create(name="Manager")
         seller_group, _ = Group.objects.get_or_create(name="Seller")
 
-        # Usuário Gerente com permissão de aprovação e conclusão
+        # Gerente
         gerente, _ = User.objects.get_or_create(
             username="gerente",
             defaults={"email": "gerente@drivehub.local", "is_staff": True},
         )
-        gerente.set_password("gerente123")
+        gerente.set_password(manager_password)
         gerente.is_staff = True
         gerente.groups.add(manager_group)
         gerente.save()
 
-        # Usuário Vendedor sem alçada gerencial
+        # Vendedor
         vendedor, _ = User.objects.get_or_create(
             username="vendedor",
             defaults={"email": "vendedor@drivehub.local", "is_staff": False},
         )
-        vendedor.set_password("vendedor123")
+        vendedor.set_password(seller_password)
         vendedor.is_staff = False
         vendedor.groups.add(seller_group)
         vendedor.save()
 
-        self.stdout.write(f"  + Operador 'gerente' configurado (senha: gerente123, grupo: Manager)")
-        self.stdout.write(f"  + Operador 'vendedor' configurado (senha: vendedor123, grupo: Seller)")
+        self.stdout.write(f"  + Gerente configurado: 'gerente' | Senha gerada/atribuída: {manager_password}")
+        self.stdout.write(f"  + Vendedor configurado: 'vendedor' | Senha gerada/atribuída: {seller_password}")
 
         brand_repo = DjangoBrandRepository()
         vehicle_repo = DjangoVehicleRepository()
@@ -140,18 +190,16 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.MIGRATE_HEADING("Gerando propostas comerciais de demonstração..."))
 
-        # Proposta 1: Audi RS6 com desconto de ~8% (requer aprovação gerencial)
         audi = created_vehicles[3]
         p1 = create_proposal.execute(
             vehicle_id=audi.id,
             customer_name="Dr. Henrique Vasconcelos",
-            proposed_value=Decimal("1085000.00"),  # ~8% de desconto
+            proposed_value=Decimal("1085000.00"),
             payment_method=PaymentMethod.FINANCED,
-            down_payment=Decimal("300000.00"),  # > 20%
+            down_payment=Decimal("300000.00"),
         )
         self.stdout.write(f"  + Proposta 1 criada: Audi RS6 -> {p1.customer_name} (Status: {p1.status.value})")
 
-        # Proposta 2: Toyota Corolla Cross com desconto de 3% (aprovada automaticamente)
         toyota = created_vehicles[5]
         p2 = create_proposal.execute(
             vehicle_id=toyota.id,
@@ -162,7 +210,6 @@ class Command(BaseCommand):
         )
         self.stdout.write(f"  + Proposta 2 criada: Corolla Cross -> {p2.customer_name} (Status: {p2.status.value})")
 
-        # Proposta 3: Volvo XC60 aprovada e concluída (Venda Fechada)
         volvo = created_vehicles[6]
         p3 = create_proposal.execute(
             vehicle_id=volvo.id,
