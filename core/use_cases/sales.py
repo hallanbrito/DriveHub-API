@@ -8,21 +8,34 @@ class CreateSaleProposalUseCase:
     def __init__(self, vehicle_repository: VehicleRepository, proposal_repository: SaleProposalRepository) -> None:
         self.vehicle_repository = vehicle_repository
         self.proposal_repository = proposal_repository
+
     def execute(self, *, vehicle_id: int, customer_name: str, proposed_value: Decimal, payment_method: PaymentMethod, down_payment: Decimal) -> SaleProposal:
-        vehicle = self.vehicle_repository.get_by_id(vehicle_id)
+        vehicle = self.vehicle_repository.get_by_id(vehicle_id, for_update=True)
         if vehicle is None:
             raise DomainException("Veículo não encontrado.")
-        proposal = SaleProposal.create(vehicle=vehicle, customer_name=customer_name, proposed_value=proposed_value, payment_method=payment_method, down_payment=down_payment)
+        proposal = SaleProposal.create(
+            vehicle=vehicle,
+            customer_name=customer_name,
+            proposed_value=proposed_value,
+            payment_method=payment_method,
+            down_payment=down_payment,
+        )
         self.vehicle_repository.save(vehicle)
         return self.proposal_repository.save(proposal)
 
 class ApproveSaleProposalUseCase:
-    def __init__(self, proposal_repository: SaleProposalRepository) -> None:
+    def __init__(self, proposal_repository: SaleProposalRepository, vehicle_repository: VehicleRepository | None = None) -> None:
         self.proposal_repository = proposal_repository
+        self.vehicle_repository = vehicle_repository
+
     def execute(self, proposal_id: int) -> SaleProposal:
-        proposal = self.proposal_repository.get_by_id(proposal_id)
+        proposal = self.proposal_repository.get_by_id(proposal_id, for_update=True)
         if proposal is None:
             raise DomainException("Proposta não encontrada.")
+        if self.vehicle_repository is not None:
+            vehicle = self.vehicle_repository.get_by_id(proposal.vehicle_id, for_update=True)
+            if vehicle and not vehicle.can_receive_proposal_from(proposal.customer_name):
+                raise DomainException("O veículo da proposta não está mais disponível para esta reserva.")
         proposal.approve_by_manager()
         return self.proposal_repository.save(proposal)
 
@@ -30,11 +43,12 @@ class CompleteSaleUseCase:
     def __init__(self, vehicle_repository: VehicleRepository, proposal_repository: SaleProposalRepository) -> None:
         self.vehicle_repository = vehicle_repository
         self.proposal_repository = proposal_repository
+
     def execute(self, proposal_id: int) -> SaleProposal:
-        proposal = self.proposal_repository.get_by_id(proposal_id)
+        proposal = self.proposal_repository.get_by_id(proposal_id, for_update=True)
         if proposal is None:
             raise DomainException("Proposta não encontrada.")
-        vehicle = self.vehicle_repository.get_by_id(proposal.vehicle_id)
+        vehicle = self.vehicle_repository.get_by_id(proposal.vehicle_id, for_update=True)
         if vehicle is None:
             raise DomainException("Veículo da proposta não encontrado.")
         proposal.complete(vehicle)

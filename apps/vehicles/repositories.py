@@ -2,7 +2,9 @@ from core.domain.entities import Brand, Vehicle
 from core.domain.enums import VehicleStatus
 from .models import BrandModel, VehicleModel
 
-def to_brand(model: BrandModel) -> Brand: return Brand(id=model.id, name=model.name)
+def to_brand(model: BrandModel) -> Brand:
+    return Brand(id=model.id, name=model.name)
+
 def to_vehicle(model: VehicleModel) -> Vehicle:
     return Vehicle(
         id=model.id,
@@ -24,19 +26,34 @@ class DjangoBrandRepository:
         return to_brand(model)
 
 class DjangoVehicleRepository:
-    def get_by_id(self, vehicle_id: int) -> Vehicle | None:
-        try: model = VehicleModel.objects.select_related("brand").get(pk=vehicle_id)
-        except VehicleModel.DoesNotExist: return None
+    def get_by_id(self, vehicle_id: int, for_update: bool = False) -> Vehicle | None:
+        try:
+            qs = VehicleModel.objects.select_related("brand")
+            if for_update:
+                qs = qs.select_for_update()
+            model = qs.get(pk=vehicle_id)
+        except VehicleModel.DoesNotExist:
+            return None
         return to_vehicle(model)
+
     def save(self, vehicle: Vehicle) -> Vehicle:
         brand_model = BrandModel.objects.get(pk=vehicle.brand.id)
         model, _ = VehicleModel.objects.update_or_create(
             pk=vehicle.id,
             defaults={
-                "brand": brand_model, "model": vehicle.model, "factory_year": vehicle.factory_year,
-                "model_year": vehicle.model_year, "plate": vehicle.plate, "value": vehicle.value,
-                "mileage": vehicle.mileage, "status": vehicle.status.value, "reservation_customer": vehicle.reservation_customer,
-                "photo_url": vehicle.photo_url
-            }
+                "brand": brand_model,
+                "model": vehicle.model,
+                "factory_year": vehicle.factory_year,
+                "model_year": vehicle.model_year,
+                "plate": vehicle.plate,
+                "value": vehicle.value,
+                "mileage": vehicle.mileage,
+                "status": vehicle.status.value,
+                "reservation_customer": vehicle.reservation_customer,
+                "photo_url": vehicle.photo_url,
+            },
         )
         return to_vehicle(VehicleModel.objects.select_related("brand").get(pk=model.pk))
+
+    def list_all(self) -> list[Vehicle]:
+        return [to_vehicle(m) for m in VehicleModel.objects.select_related("brand").all().order_by("-id")]

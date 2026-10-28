@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
 
 from apps.sales.models import SaleProposalModel
@@ -19,13 +20,41 @@ class Command(BaseCommand):
         VehicleModel.objects.all().delete()
         BrandModel.objects.all().delete()
 
+        # Configura grupos de perfis de acesso
+        self.stdout.write(self.style.MIGRATE_HEADING("Configurando grupos e operadores..."))
+        manager_group, _ = Group.objects.get_or_create(name="Manager")
+        seller_group, _ = Group.objects.get_or_create(name="Seller")
+
+        # Usuário Gerente com permissão de aprovação e conclusão
+        gerente, _ = User.objects.get_or_create(
+            username="gerente",
+            defaults={"email": "gerente@drivehub.local", "is_staff": True},
+        )
+        gerente.set_password("gerente123")
+        gerente.is_staff = True
+        gerente.groups.add(manager_group)
+        gerente.save()
+
+        # Usuário Vendedor sem alçada gerencial
+        vendedor, _ = User.objects.get_or_create(
+            username="vendedor",
+            defaults={"email": "vendedor@drivehub.local", "is_staff": False},
+        )
+        vendedor.set_password("vendedor123")
+        vendedor.is_staff = False
+        vendedor.groups.add(seller_group)
+        vendedor.save()
+
+        self.stdout.write(f"  + Operador 'gerente' configurado (senha: gerente123, grupo: Manager)")
+        self.stdout.write(f"  + Operador 'vendedor' configurado (senha: vendedor123, grupo: Seller)")
+
         brand_repo = DjangoBrandRepository()
         vehicle_repo = DjangoVehicleRepository()
         proposal_repo = DjangoSaleProposalRepository()
 
         create_vehicle = CreateVehicleUseCase(brand_repo, vehicle_repo)
         create_proposal = CreateSaleProposalUseCase(vehicle_repo, proposal_repo)
-        approve_proposal = ApproveSaleProposalUseCase(proposal_repo)
+        approve_proposal = ApproveSaleProposalUseCase(proposal_repo, vehicle_repo)
         complete_sale = CompleteSaleUseCase(vehicle_repo, proposal_repo)
 
         self.stdout.write(self.style.MIGRATE_HEADING("Cadastrando veículos do showroom..."))
@@ -98,18 +127,8 @@ class Command(BaseCommand):
                 "model_year": 2024,
                 "plate": "VLV6X88",
                 "value": Decimal("465000.00"),
-                "mileage": 14000,
-                "photo_url": "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1200&q=80",
-            },
-            {
-                "brand_name": "Land Rover",
-                "model": "Defender 110 X-Dynamic HSE",
-                "factory_year": 2023,
-                "model_year": 2023,
-                "plate": "LND1D10",
-                "value": Decimal("750000.00"),
-                "mileage": 16200,
-                "photo_url": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+                "mileage": 15400,
+                "photo_url": "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=80",
             },
         ]
 
@@ -152,10 +171,8 @@ class Command(BaseCommand):
             payment_method=PaymentMethod.CASH,
             down_payment=Decimal("0.00"),
         )
-        # Se tiver precisado de gerente, aprova
         if p3.requires_manager_approval:
             approve_proposal.execute(p3.id)
-        # Conclui venda
         complete_sale.execute(p3.id)
         self.stdout.write(f"  + Proposta 3 criada e concluída: Volvo XC60 -> {p3.customer_name} (Veículo VENDIDO)")
 

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.db import transaction
 from django.db.models import Q, Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -29,6 +30,7 @@ class VehicleViewSet(viewsets.ReadOnlyModelViewSet):
             )
         return queryset
 
+    @transaction.atomic
     def create(self, request):
         serializer = CreateVehicleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -40,6 +42,7 @@ class VehicleViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(VehicleSerializer(model).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["patch"], url_path="mileage")
+    @transaction.atomic
     def mileage(self, request, pk=None):
         serializer = MileageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

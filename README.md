@@ -20,18 +20,24 @@ DriveHub-API/
 │
 ├── apps/                         # Camada de Infraestrutura / Framework (Django & DRF)
 │   ├── vehicles/                 # Models, Serializers, Views, Repositories e Seed
-│   └── sales/                    # Models, Serializers, Views e Repositories
+│   └── sales/                    # Models, Serializers, Views, Permissions e Repositories
 │
 ├── app/                          # Configurações do Projeto Django (Settings, URLs, OpenAPI)
 └── tests/                        # Pirâmide de Testes Automatizados
     ├── unit/                     # Testes de Domínio e Casos de Uso com Fakes em memória
-    └── integration/              # Testes de Endpoints HTTP com banco de testes
+    └── integration/              # Testes de Endpoints HTTP, RBAC, Transações e Concorrência
 ```
 
 ---
 
 ## 💼 Regras de Negócio e Governança
 
+- **Controle de Acesso por Perfil (RBAC)**:
+  - Operações críticas como `approve` e `complete` são restritas a usuários autenticados com perfil de **Gerente** (`IsManager`).
+  - Usuários anônimos e vendedores comuns são impedidos com HTTP 401/403.
+- **Atomicidade e Concorrência**:
+  - Todas as operações compostas (ex: transição de status do veículo + registro/aprovação/conclusão de proposta) são executadas dentro de transações atômicas (`@transaction.atomic`).
+  - Bloqueio pessimista via `select_for_update()` para impedir que múltiplos clientes reservem ou concluam venda concorrente no mesmo veículo.
 - **Auditoria de Hodômetro**: A quilometragem de um veículo nunca pode ser reduzida retroativamente.
 - **Validação de Anos**: O ano de fabricação deve ser $\ge 1886$ e o ano do modelo deve ser maior ou igual ao ano de fabricação.
 - **Governança de Descontos**:
@@ -43,6 +49,24 @@ DriveHub-API/
   - `AVAILABLE` (Disponível para propostas)
   - `RESERVED` (Reservado para o cliente que enviou proposta)
   - `SOLD` (Vendido após conclusão da proposta aprovada)
+
+---
+
+## ⚙️ Variáveis de Ambiente & Configuração
+
+O sistema separa desenvolvimento local de produção via variáveis de ambiente. Para configurar:
+
+```bash
+cp .env.example .env
+```
+
+| Variável | Descrição | Default em Dev |
+|---|---|---|
+| `DJANGO_ENV` | Ambiente (`development` ou `production`) | `development` |
+| `SECRET_KEY` | Chave secreta do Django (obrigatória em prod) | Chave local dev |
+| `DEBUG` | Modo debug ativo | `True` |
+| `ALLOWED_HOSTS` | Hosts autorizados separados por vírgula | `localhost,127.0.0.1` |
+| `CORS_ALLOWED_ORIGINS` | Origens autorizadas para o frontend Vite | `http://localhost:5173,...` |
 
 ---
 
@@ -61,6 +85,10 @@ python manage.py migrate
 python manage.py seed_drivehub
 ```
 
+O comando `seed_drivehub` cria automaticamente os operadores de demonstração:
+- **Gerente**: usuário `gerente` | senha `gerente123` (Grupo: `Manager`, alçada de aprovação)
+- **Vendedor**: usuário `vendedor` | senha `vendedor123` (Grupo: `Seller`)
+
 ### 3. Iniciar Servidor
 ```bash
 python manage.py runserver 8000
@@ -73,7 +101,7 @@ python manage.py runserver 8000
 
 ## 🧪 Testes Automatizados
 
-O projeto conta com suite de testes unitários isolados com fakes em memória e testes de integração com Django REST Framework:
+Suite com 24 testes automatizados cobrindo testes unitários, testes negativos de domínio, concorrência, autorização RBAC e atomicidade transacional:
 
 ```bash
 pytest -v
