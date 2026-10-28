@@ -10,8 +10,15 @@ from .repositories import DjangoSaleProposalRepository
 from .serializers import CreateSaleProposalSerializer, SaleProposalSerializer
 
 class SaleProposalViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = SaleProposalModel.objects.select_related("vehicle").all()
     serializer_class = SaleProposalSerializer
+
+    def get_queryset(self):
+        queryset = SaleProposalModel.objects.select_related("vehicle", "vehicle__brand").all().order_by("-id")
+        status_filter = self.request.query_params.get("status")
+        if status_filter:
+            queryset = queryset.filter(status=status_filter.upper())
+        return queryset
+
     def create(self, request):
         serializer = CreateSaleProposalSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -24,17 +31,23 @@ class SaleProposalViewSet(viewsets.ReadOnlyModelViewSet):
             )
         except DomainException as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        model = SaleProposalModel.objects.select_related("vehicle").get(pk=proposal.id)
+        model = SaleProposalModel.objects.select_related("vehicle", "vehicle__brand").get(pk=proposal.id)
         return Response(SaleProposalSerializer(model).data, status=status.HTTP_201_CREATED)
+
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
-        try: proposal = ApproveSaleProposalUseCase(DjangoSaleProposalRepository()).execute(int(pk))
-        except DomainException as exc: return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        model = SaleProposalModel.objects.select_related("vehicle").get(pk=proposal.id)
+        try:
+            proposal = ApproveSaleProposalUseCase(DjangoSaleProposalRepository()).execute(int(pk))
+        except DomainException as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        model = SaleProposalModel.objects.select_related("vehicle", "vehicle__brand").get(pk=proposal.id)
         return Response(SaleProposalSerializer(model).data)
+
     @action(detail=True, methods=["post"])
     def complete(self, request, pk=None):
-        try: proposal = CompleteSaleUseCase(DjangoVehicleRepository(), DjangoSaleProposalRepository()).execute(int(pk))
-        except DomainException as exc: return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-        model = SaleProposalModel.objects.select_related("vehicle").get(pk=proposal.id)
+        try:
+            proposal = CompleteSaleUseCase(DjangoVehicleRepository(), DjangoSaleProposalRepository()).execute(int(pk))
+        except DomainException as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        model = SaleProposalModel.objects.select_related("vehicle", "vehicle__brand").get(pk=proposal.id)
         return Response(SaleProposalSerializer(model).data)

@@ -30,6 +30,7 @@ class Vehicle:
     mileage: int
     status: VehicleStatus = VehicleStatus.AVAILABLE
     reservation_customer: Optional[str] = None
+    photo_url: Optional[str] = None
     id: Optional[int] = None
     def __post_init__(self) -> None:
         self.model = self.model.strip()

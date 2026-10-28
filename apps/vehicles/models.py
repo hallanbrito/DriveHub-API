@@ -17,4 +17,5 @@ class VehicleModel(models.Model):
     mileage = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.AVAILABLE)
     reservation_customer = models.CharField(max_length=200, null=True, blank=True)
+    photo_url = models.URLField(max_length=500, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

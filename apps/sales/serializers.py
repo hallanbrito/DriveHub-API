@@ -2,11 +2,28 @@ from rest_framework import serializers
 from .models import SaleProposalModel
 
 class SaleProposalSerializer(serializers.ModelSerializer):
+    vehicle_brand = serializers.CharField(source="vehicle.brand.name", read_only=True)
     vehicle_model = serializers.CharField(source="vehicle.model", read_only=True)
     vehicle_plate = serializers.CharField(source="vehicle.plate", read_only=True)
+    vehicle_value = serializers.DecimalField(source="vehicle.value", max_digits=12, decimal_places=2, read_only=True)
+
     class Meta:
         model = SaleProposalModel
-        fields = ["id", "vehicle", "vehicle_model", "vehicle_plate", "customer_name", "proposed_value", "payment_method", "down_payment", "requires_manager_approval", "status"]
+        fields = [
+            "id",
+            "vehicle",
+            "vehicle_brand",
+            "vehicle_model",
+            "vehicle_plate",
+            "vehicle_value",
+            "customer_name",
+            "proposed_value",
+            "payment_method",
+            "down_payment",
+            "requires_manager_approval",
+            "status",
+            "created_at",
+        ]
 
 class CreateSaleProposalSerializer(serializers.Serializer):
     vehicle_id = serializers.IntegerField(min_value=1)
