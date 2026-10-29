@@ -49,10 +49,28 @@
 - [x] T05: Draft PR aberto para revisão do orquestrador e aceite do PO.
 
 ### Estratégia de Reversão e Rollback Auditável
-- **Pós-Integração (na branch `main`):**
-  - O procedimento padrão e obrigatório de reversão após eventual integração é o uso de **`git revert`**, gerando um commit explícito de reversão que documenta no histórico o motivo do cancelamento e mantém a auditoria íntegra.
-  - Comando em caso de merge commit: `git revert -m 1 <merge-commit-sha> -m "revert(w0): reversão da Fatia W0 devido a [motivo]"`
-  - *Proibição:* O uso de `git reset --hard` em branch integrada ou pública é estritamente desaconselhado e vedado pela governança do projeto, pois reescreve histórico e destrói evidências.
+- **Pós-Integração (procedimento conforme método efetivo de merge em `main`):**
+  - **Caso A — Merge Commit:** Quando a integração produzir commit de merge com dois ou mais pais (onde o primeiro pai representa a linha principal `main`):
+    ```bash
+    git revert -m 1 <merge-commit-sha>
+    ```
+    *Nota:* Confirmar previamente os pais e a direção da integração via `git log --parents -1 <merge-commit-sha>`.
+  - **Caso B — Squash Merge:** Quando a integração produzir um único commit consolidado:
+    ```bash
+    git revert <squash-commit-sha>
+    ```
+  - **Caso C — Rebase Merge:** Quando a integração preservar múltiplos commits lineares:
+    - Identificar todos os commits introduzidos pela fatia W0.
+    - Avaliar a ordem segura de reversão (da ponta mais recente para a mais antiga).
+    - Reverter os commits aplicáveis de forma individual e auditável (`git revert <commit-sha>`).
+    - Não assumir que existe um merge commit.
+- **Política Geral de Rollback:**
+  - Nunca aplicar `git reset --hard` à `main` como estratégia normal de rollback.
+  - Não executar comandos destrutivos automaticamente.
+  - Verificar a árvore de trabalho (`git status` limpo) antes de qualquer reversão.
+  - Registrar SHA, motivo, impacto, resultado e evidências documentais no RUC e histórico.
+  - Validar a aplicação (executar testes e verificação de integridade) imediatamente após o rollback.
+  - Exigir autorização explícita e formal do PO antes de executar uma reversão real.
 - **Pré-Integração (na branch isolada de trabalho):**
   - Para anular alterações na branch antes do merge: `git revert <commit-sha>`.
   - Se a fatia for rejeitada integralmente pelo PO antes do merge: a branch de trabalho pode ser fechada e arquivada ou descartada sem afetar a estabilidade de `main`.

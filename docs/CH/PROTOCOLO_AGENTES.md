@@ -14,7 +14,18 @@ Este documento define os procedimentos operacionais para agentes autônomos e as
    - **E — Evoluir**: Produza o Pacote de Evidências / RUC, submeta Draft PR e aguarde parecer do orquestrador e decisão do PO.
 3. **Isolamento de Branches**: Nunca comite diretamente em `main`. Trabalhe exclusivamente em branches isoladas de W.
 
-4. **Estratégia de Reversão Auditável**: Qualquer reversão pós-integração deve obrigatoriamente utilizar `git revert`, gerando commit auditável com justificativa. É expressamente desaconselhado o uso de `git reset --hard` como procedimento padrão em branches públicas/integradas.
+4. **Estratégia de Reversão Auditável**:
+   - Qualquer reversão pós-integração deve ser proporcional ao método de merge efetivamente utilizado:
+     - **Caso A — Merge Commit:** Se a integração produziu commit de merge com dois ou mais pais (primeiro pai representando `main`), reverter via `git revert -m 1 <merge-commit-sha>`, após confirmação prévia dos pais.
+     - **Caso B — Squash Merge:** Se a integração produziu commit consolidado único, reverter via `git revert <squash-commit-sha>`.
+     - **Caso C — Rebase Merge:** Se a integração preservou múltiplos commits lineares, identificar todos os commits introduzidos e revertê-los em ordem cronológica inversa de forma auditável (não assumir existência de merge commit).
+   - **Política Geral de Rollback:**
+     - Nunca aplicar `git reset --hard` à `main` como estratégia normal de rollback.
+     - Não executar comandos destrutivos automaticamente.
+     - Verificar e assegurar árvore de trabalho limpa antes da reversão.
+     - Registrar SHA, motivo, impacto, resultado e evidências no histórico/RUC.
+     - Validar a aplicação (testes e build) imediatamente após a reversão.
+     - Exigir autorização explícita do PO antes de executar qualquer reversão real.
 
 ---
 

@@ -29,4 +29,5 @@
   - `DECLARADO`: Afirmação recebida de terceiros sem checagem direta.
   - `INFERIDO`: Conclusão lógica derivada de premissas.
   - `NÃO_VERIFICADO`: Ausência de teste ou verificação direta.
+- **Estratégia de Rollback Auditável**: Qualquer reversão pós-integração deve ser proporcional ao método de merge utilizado (Merge Commit: `git revert -m 1 <merge-sha>`; Squash Merge: `git revert <squash-sha>`; Rebase Merge: reversão ordenada dos commits lineares). Nunca aplicar `git reset --hard` à `main`. Reversões reais exigem árvore limpa, autorização prévia do PO, registro de evidências e validação pós-reversão.
 - **Entrega e Fechamento**: Toda fatia agêntica termina com a árvore de trabalho limpa, Draft PR submetido e Pacote de Evidências / RUC preenchido. O estado final é sempre **AGUARDANDO REAUDITORIA DO ORQUESTRADOR E ACEITE DO PO**.

@@ -36,8 +36,15 @@
 - [ ] T01:
 
 ### Estratégia de reversão auditável
-- Pós-integração: `git revert -m 1 <merge-sha>` (reversão com commit auditável; evitar `git reset --hard`)
-- Pré-integração: `git revert <commit-sha>` ou descarte da branch isolada
+- **Pós-integração (conforme método de merge utilizado):**
+  - *Caso A — Merge Commit:* `git revert -m 1 <merge-commit-sha>` (confirmar previamente os pais e direção)
+  - *Caso B — Squash Merge:* `git revert <squash-commit-sha>`
+  - *Caso C — Rebase Merge:* Reversão ordenada e individual dos commits lineares identificados (`git revert <sha>`)
+- **Pré-integração:** `git revert <commit-sha>` ou descarte da branch isolada
+- **Diretrizes gerais:**
+  - Nunca aplicar `git reset --hard` à `main` como procedimento de rollback.
+  - Exigir árvore limpa e autorização explícita do PO antes de executar reversão real.
+  - Validar a aplicação (testes/build) e registrar evidências após o rollback.
 
 ---
 
