@@ -1,7 +1,7 @@
 # ADR-0001 — Adoção do Método C.H. e Clean Architecture no Backend
 
-- **Data:** 2026-10-28
-- **Estado:** Homologada
+- **Data:** 2026-10-29
+- **Estado:** Proposta (Aguardando homologação e aceite do PO na W0)
 - **Decisor:** Product Owner (Hallan)
 
 ---
@@ -13,9 +13,9 @@ A API do DriveHub evoluiu de um protótipo monolítico simples para uma platafor
 
 ## 2. Decisão
 1. **Governança:** Adoção oficial do **Método Ágil C.H. (Colaboração Híbrida)**, dividindo o ciclo de entrega em fases CHAVE e Fatias W com autonomia calibrada (CH-0 a CH-3) e gates de evidências verificáveis.
-2. **Padrão Arquitetural:** Implementação de **Clean Architecture** e **Domain-Driven Design (DDD)** com segregação explícita entre Domínio puro (`core/domain`), Casos de Uso (`core/use_cases`) e Infraestrutura Django (`apps/`).
+2. **Padrão Arquitetural:** Formalização da **Clean Architecture** e **Domain-Driven Design (DDD)** com segregação explícita entre Domínio puro (`core/domain`), Casos de Uso (`core/use_cases`) e Infraestrutura Django (`apps/`).
 3. **Persistência:** Suporte a SQLite em desenvolvimento com preparação arquitetural para PostgreSQL com MVCC em produção via `select_for_update()`.
-4. **Controle de Acesso:** Implementação de política RBAC via permissão `IsManager` nas ações de maior sensibilidade negocial (`approve` e `complete`).
+4. **Controle de Acesso:** Manutenção da política RBAC via permissão `IsManager` nas ações de maior sensibilidade negocial (`approve` e `complete`).
 
 ---
 

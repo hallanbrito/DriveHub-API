@@ -48,8 +48,14 @@
 - [x] T04: Suite de 32 testes automatizados executada e 100% aprovada (`pytest -v`).
 - [x] T05: Draft PR aberto para revisão do orquestrador e aceite do PO.
 
-### Estratégia de Reversão
-Reverter o commit gerado na branch `metodo_ch_auditoria_w0` através de `git reset --hard 829da97afe6e2237ea48b1e6ec84dd969bd262cf`.
+### Estratégia de Reversão e Rollback Auditável
+- **Pós-Integração (na branch `main`):**
+  - O procedimento padrão e obrigatório de reversão após eventual integração é o uso de **`git revert`**, gerando um commit explícito de reversão que documenta no histórico o motivo do cancelamento e mantém a auditoria íntegra.
+  - Comando em caso de merge commit: `git revert -m 1 <merge-commit-sha> -m "revert(w0): reversão da Fatia W0 devido a [motivo]"`
+  - *Proibição:* O uso de `git reset --hard` em branch integrada ou pública é estritamente desaconselhado e vedado pela governança do projeto, pois reescreve histórico e destrói evidências.
+- **Pré-Integração (na branch isolada de trabalho):**
+  - Para anular alterações na branch antes do merge: `git revert <commit-sha>`.
+  - Se a fatia for rejeitada integralmente pelo PO antes do merge: a branch de trabalho pode ser fechada e arquivada ou descartada sem afetar a estabilidade de `main`.
 
 ---
 
@@ -68,4 +74,4 @@ Reverter o commit gerado na branch `metodo_ch_auditoria_w0` através de `git res
 ---
 
 ## E — Evoluir
-- **Estado:** AGUARDANDO REVISÃO DO ORQUESTRADOR E ACEITE DO PO.
+- **Estado:** AGUARDANDO REAUDITORIA DO ORQUESTRADOR E ACEITE DO PO.

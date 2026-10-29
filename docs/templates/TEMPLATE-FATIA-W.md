@@ -35,8 +35,9 @@
 ### Critérios de aceitação verificáveis
 - [ ] T01:
 
-### Estratégia de reversão
--
+### Estratégia de reversão auditável
+- Pós-integração: `git revert -m 1 <merge-sha>` (reversão com commit auditável; evitar `git reset --hard`)
+- Pré-integração: `git revert <commit-sha>` ou descarte da branch isolada
 
 ---
 

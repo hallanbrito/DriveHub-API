@@ -14,6 +14,8 @@ Este documento define os procedimentos operacionais para agentes autônomos e as
    - **E — Evoluir**: Produza o Pacote de Evidências / RUC, submeta Draft PR e aguarde parecer do orquestrador e decisão do PO.
 3. **Isolamento de Branches**: Nunca comite diretamente em `main`. Trabalhe exclusivamente em branches isoladas de W.
 
+4. **Estratégia de Reversão Auditável**: Qualquer reversão pós-integração deve obrigatoriamente utilizar `git revert`, gerando commit auditável com justificativa. É expressamente desaconselhado o uso de `git reset --hard` como procedimento padrão em branches públicas/integradas.
+
 ---
 
 ## 2. Gates de Qualidade e Critérios de Conclusão (DoD)
@@ -24,4 +26,4 @@ Antes de finalizar qualquer intervenção técnica, o agente deve comprovar:
 - [ ] Nenhuma alteração fora dos caminhos e escopo autorizados na Fatia W.
 - [ ] Documentação de governança (`docs/STATUS.md`, `docs/CH/DECISOES.md`) devidamente atualizada com dados fáticos.
 - [ ] Draft PR criado com descrição clara dos commits, evidências e plano de reversão.
-- [ ] Estado final declarado obrigatoriamente como: **AGUARDANDO REVISÃO DO ORQUESTRADOR E ACEITE DO PO**.
+- [ ] Estado final declarado obrigatoriamente como: **AGUARDANDO REAUDITORIA DO ORQUESTRADOR E ACEITE DO PO**.

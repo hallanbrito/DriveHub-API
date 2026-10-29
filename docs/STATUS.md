@@ -1,19 +1,21 @@
 # Status — DriveHub API
 
-## 1. Último Marco Homologado e Integrado
-- **Marco:** Consolidação da Clean Architecture, DDD e Endpoints de Concessionária (PR #1).
-- **Data do Aceite pelo PO:** 2026-10-28 17:10:42 -0300.
+## 1. Baseline Histórico Integrado (Pré-Método C.H.)
+- **Marco Histórico:** Consolidação da Clean Architecture, DDD e Endpoints de Concessionária (PR #1).
+- **Data da Integração:** 2026-10-28 17:10:42 -0300.
 - **Commit Integrado em `main`:** `829da97afe6e2237ea48b1e6ec84dd969bd262cf`.
-- **Status:** HOMOLOGADO LOCALMENTE PELO PO.
+- **Status Factual:** Baseline técnico integrado na branch `main`. Não possui homologação retroativa sob o Método C.H.
 
 ---
 
-## 2. Marco Corrente (Em Execução)
+## 2. Marco Corrente do Método C.H. (Fatia W0 — Em Revisão)
 - **Marco:** W0 — Fundação e Governança do Método C.H.
 - **Autonomia Autorizada:** CH-2.
-- **Branch:** `metodo_ch_auditoria_w0`.
+- **Branch de Trabalho:** `metodo_ch_auditoria_w0`.
+- **Draft PR:** [#2](https://github.com/hallanbrito/DriveHub-API/pull/2).
 - **Baseline de Origem:** `829da97afe6e2237ea48b1e6ec84dd969bd262cf`.
 - **Objetivo da W0:** Adequar o repositório às normas oficiais do Método C.H. (docs, templates, ADRs, contratos, AGENTS.md e rastreabilidade), sem alterar o comportamento funcional da aplicação.
+- **Estado Atual da W0:** AGUARDANDO REAUDITORIA DO ORQUESTRADOR E ACEITE DO PO.
 
 ---
 

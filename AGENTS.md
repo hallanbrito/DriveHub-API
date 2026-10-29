@@ -29,4 +29,4 @@
   - `DECLARADO`: Afirmação recebida de terceiros sem checagem direta.
   - `INFERIDO`: Conclusão lógica derivada de premissas.
   - `NÃO_VERIFICADO`: Ausência de teste ou verificação direta.
-- **Entrega e Fechamento**: Toda fatia agêntica termina com a árvore de trabalho limpa, Draft PR submetido e Pacote de Evidências / RUC preenchido. O estado final é sempre **AGUARDANDO REVISÃO DO ORQUESTRADOR E ACEITE DO PO**.
+- **Entrega e Fechamento**: Toda fatia agêntica termina com a árvore de trabalho limpa, Draft PR submetido e Pacote de Evidências / RUC preenchido. O estado final é sempre **AGUARDANDO REAUDITORIA DO ORQUESTRADOR E ACEITE DO PO**.

@@ -63,5 +63,5 @@
 - **Commit / HEAD:**
 - **Draft PR:**
 - **Árvore limpa:** SIM
-- **Plano de reversão:**
-- **Status:** AGUARDANDO REVISÃO DO ORQUESTRADOR E ACEITE DO PO
+- **Plano de reversão auditável:** `git revert` pós-integração (evitar `git reset --hard`)
+- **Status:** AGUARDANDO REAUDITORIA DO ORQUESTRADOR E ACEITE DO PO
