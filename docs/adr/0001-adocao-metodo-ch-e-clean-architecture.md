@@ -1,7 +1,7 @@
 # ADR-0001 — Adoção do Método C.H. e Clean Architecture no Backend
 
 - **Data:** 2026-10-29
-- **Estado:** Proposta (Aguardando homologação e aceite do PO na W0)
+- **Estado:** Homologada (Integrada em `main` via Squash Merge `a88be75b1d6084e95801b4e7c18500126f29d32f` pelo PO)
 - **Decisor:** Product Owner (Hallan)
 
 ---
