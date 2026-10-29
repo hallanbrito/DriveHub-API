@@ -63,5 +63,5 @@
 - **Commit / HEAD:**
 - **Draft PR:**
 - **Árvore limpa:** SIM
-- **Plano de reversão auditável:** Proporcional ao método de integração (Caso A — Merge Commit: `git revert -m 1 <merge-sha>`; Caso B — Squash Merge: `git revert <squash-sha>`; Caso C — Rebase Merge: reversão ordenada linear). Vedado `git reset --hard` em `main`. Reversão exige autorização do PO, árvore limpa, validação pós-rollback e registro de evidências.
+- **Plano de reversão auditável:** Proporcional ao método de integração (Caso A — Merge Commit: `git revert -m 1 <merge-sha>`; Caso B — Squash Merge: `git revert <squash-sha>` sem `-m`; Caso C — Rebase Merge: reversão ordenada linear). Vedado `git reset --hard` e push direto em `main`. Reversão pós-integração deve tramitar via branch isolada e PR com CI gates, validação pós-rollback e aceite formal do PO.
 - **Status:** AGUARDANDO REAUDITORIA DO ORQUESTRADOR E ACEITE DO PO

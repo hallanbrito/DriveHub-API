@@ -8,8 +8,10 @@
 
 | ID | Data | Decisão | Fonte / Evidência | Estado C.H. | Decisor |
 |---|---|---|---|---|---|
-| ADR-0001 | 2026-10-29 | Adoção formal do Método Ágil C.H. e Clean Architecture como padrão de governança | `docs/adr/0001-adocao-metodo-ch-e-clean-architecture.md` / PR #2 | PROPOSTA (W0) | PO Hallan |
-| D-0002 | 2026-10-29 | Delimitação de escopo, contratos full-stack e catálogo de riscos técnicos da W0 sem mutação de código de negócio | `docs/CH/W0-GOVERNANCA.md` / PR #2 | EM_REVISAO | Orquestrador / PO |
+| ADR-0001 | 2026-10-29 | Adoção formal do Método Ágil C.H. e Clean Architecture como padrão de governança | PR #2 / Squash `a88be75b1d6084e95801b4e7c18500126f29d32f` | HOMOLOGADA | PO Hallan |
+| D-0002 | 2026-10-29 | Delimitação de escopo, contratos full-stack e catálogo de riscos técnicos da W0 sem mutação de código de negócio | `docs/CH/W0-GOVERNANCA.md` / PR #2 | HOMOLOGADA | PO Hallan |
+| D-0005 | 2026-10-29 | Homologação final e integração da Fatia W0 na branch `main` via Squash Merge | PR #2 / Commit `a88be75b1d6084e95801b4e7c18500126f29d32f` | HOMOLOGADA | PO Hallan |
+| D-0006 | 2026-10-29 | Implantação de workflow de CI automatizado (`.github/workflows/ci.yml`) e proposta de ruleset para a branch `main` | `docs/CH/W0.1-GOVERNANCA.md` / Issue #3 | PROPOSTA (W0.1) | Orquestrador / PO |
 
 ---
 
