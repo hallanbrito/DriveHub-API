@@ -8,6 +8,7 @@ API REST corporativa para gestão comercial e governança de estoque e vendas de
 
 ```
 DriveHub-API/
+├── AGENTS.md                     # Diretrizes e restrições para agentes de IA
 ├── core/                         # Núcleo de Domínio Independente de Frameworks
 │   ├── domain/
 │   │   ├── entities.py           # Entidades puras (Vehicle, Brand, SaleProposal)
@@ -23,10 +24,37 @@ DriveHub-API/
 │   └── sales/                    # Models, Serializers, Views, Permissions e Repositories
 │
 ├── app/                          # Configurações do Projeto Django (Settings, URLs, OpenAPI)
+├── docs/                         # Governança e Memória do Método C.H.
+│   ├── PROJETO.md                # Visão, valor, arquitetura e limites
+│   ├── STATUS.md                 # Marcos aceitos, baseline e próximo marco
+│   ├── ARQUITETURA.md            # Detalhamento arquitetural e persistência
+│   ├── CH/                       # Decisões, protocolo de agentes, contratos e Fatias W
+│   ├── adr/                      # Architectural Decision Records
+│   └── templates/                # Templates de ADR, Fatia W e Pacote de Evidências
 └── tests/                        # Pirâmide de Testes Automatizados
     ├── unit/                     # Testes de Domínio e Casos de Uso com Fakes em memória
     └── integration/              # Testes de Endpoints HTTP, RBAC, Transações, Hardening e Concorrência
 ```
+
+---
+
+## 🛡️ Governança & Método Ágil C.H.
+
+Este repositório adota rigorosamente o **Método Ágil C.H. (Colaboração Híbrida)**, fonte normativa canônica em [hallanbrito/metodo-ch](https://github.com/hallanbrito/metodo-ch).
+
+- **Product Owner (PO):** Hallan (Autoridade única sobre valor, escopo, segurança e homologação)
+- **Orquestrador Cognitivo:** ChatGPT (Decomposição em Fatias W, contratos e resolução de conflitos)
+- **Executor Agêntico:** AGY / outros autorizados (Execução isolada em branches de W com autonomia calibrada)
+- **Ciclo Operacional:** Ciclo CHAVE (**C**ontextualizar $\to$ **H**armonizar $\to$ **A**gir $\to$ **V**erificar $\to$ **E**voluir).
+- **Trilha de Memória e Governança:**
+  - [Instruções aos Agentes (`AGENTS.md`)](AGENTS.md)
+  - [Visão do Projeto (`docs/PROJETO.md`)](docs/PROJETO.md)
+  - [Status e Marcos Homologados (`docs/STATUS.md`)](docs/STATUS.md)
+  - [Detalhamento Arquitetural (`docs/ARQUITETURA.md`)](docs/ARQUITETURA.md)
+  - [Contrato de Integração Full-Stack (`docs/CH/INTEGRACAO_CONTRATO.md`)](docs/CH/INTEGRACAO_CONTRATO.md)
+  - [Protocolo de Execução Agêntica (`docs/CH/PROTOCOLO_AGENTES.md`)](docs/CH/PROTOCOLO_AGENTES.md)
+  - [Índice de Decisões Aprovadas (`docs/CH/DECISOES.md`)](docs/CH/DECISOES.md)
+  - [ADR-0001 — Adoção do Método C.H. e Clean Architecture (`docs/adr/0001-adocao-metodo-ch-e-clean-architecture.md`)](docs/adr/0001-adocao-metodo-ch-e-clean-architecture.md)
 
 ---
 
