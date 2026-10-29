@@ -17,10 +17,11 @@ Este documento define os procedimentos operacionais para agentes autônomos e as
 4. **Estratégia de Reversão Auditável**:
    - Qualquer reversão pós-integração deve ser proporcional ao método de merge efetivamente utilizado:
      - **Caso A — Merge Commit:** Se a integração produziu commit de merge com dois ou mais pais (primeiro pai representando `main`), reverter via `git revert -m 1 <merge-commit-sha>`, após confirmação prévia dos pais.
-     - **Caso B — Squash Merge:** Se a integração produziu commit consolidado único, reverter via `git revert <squash-commit-sha>`.
+     - **Caso B — Squash Merge:** Se a integração produziu commit consolidado único, reverter via `git revert <squash-commit-sha>` (sem flag `-m`, dado que o commit possui pai único).
      - **Caso C — Rebase Merge:** Se a integração preservou múltiplos commits lineares, identificar todos os commits introduzidos e revertê-los em ordem cronológica inversa de forma auditável (não assumir existência de merge commit).
    - **Política Geral de Rollback:**
      - Nunca aplicar `git reset --hard` à `main` como estratégia normal de rollback.
+     - Nunca realizar push direto em `main`; reversões pós-integração devem ser submetidas via branch isolada e Pull Request, validadas pela esteira de CI e aprovadas formalmente pelo PO.
      - Não executar comandos destrutivos automaticamente.
      - Verificar e assegurar árvore de trabalho limpa antes da reversão.
      - Registrar SHA, motivo, impacto, resultado e evidências no histórico/RUC.

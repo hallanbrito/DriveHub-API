@@ -8,7 +8,7 @@
 ---
 
 ## 1. Diagnóstico do Estado Atual
-- **Visibilidade do Repositório:** `PUBLIC` (GitHub Free/Open Source).
+- **Visibilidade do Repositório:** `PUBLIC` (GitHub Free / Open Source).
 - **Branch Principal:** `main`.
 - **Proteção Atual:** Nenhuma proteção ativa (`Branch not protected` / `rulesets: []`).
 - **Riscos Identificados:**
@@ -19,27 +19,44 @@
 
 ---
 
-## 2. Diretrizes da Proposta de Governança
-1. **Exigência de Pull Request:**
-   - Todo código deve passar obrigatoriamente por Pull Request antes de ser integrado na `main`.
-   - Exigência de no mínimo 1 aprovação formal pelo Product Owner (`hallanbrito`).
-   - Descarte automático de aprovações antigas em caso de novos commits (`dismiss_stale_reviews_on_push: true`).
-   - Exigência de encerramento de todas as conversas/tópicos de revisão (`required_review_thread_resolution: true`).
-2. **Bloqueio de Comandos Destrutivos:**
-   - Bloqueio absoluto de deleção de branch (`deletion: true`).
-   - Bloqueio absoluto de push forçado (`non_fast_forward: true`).
-3. **Status Checks Obrigatórios:**
-   - Apenas checks comprovadamente operacionais e que já passem na esteira:
-     - Check: `Django Checks & Pytest (Python 3.12)` (oriundo do workflow `.github/workflows/ci.yml`).
-   - Não exigir status checks não operacionais ou inexistentes.
-4. **Bypass Mínimo e Estrito:**
-   - Restrito exclusivamente a usuários com papel de `Repository Admin` (PO Hallan), para situações excepcionais de recuperação ou governança, preservando registro no audit log do GitHub.
+## 2. Segregação Explícita dos Quatro Pilares de Governança
+
+Para evitar impasses operacionais ou regras impossíveis de satisfazer, a governança do repositório distingue rigorosamente quatro dimensões:
+
+### Pilar 1: Revisão Técnica Independente
+- **Ator:** Orquestrador Cognitivo (ChatGPT), agentes de auditoria ou revisores técnicos pares.
+- **Natureza:** Análise técnica da solução, integridade da suite de testes, conformidade de arquitetura e ausência de regressões.
+- **Materialização:** Parecer técnico formal registrado nos comentários do Pull Request e no Pacote de Evidências / RUC. Não depende de permissões administrativas no repositório.
+
+### Pilar 2: Aceite Formal do Product Owner (PO)
+- **Ator:** Product Owner (`hallanbrito` / Hallan).
+- **Natureza:** Decisão humana soberana e indelegável sobre valor de negócio e cumprimento dos critérios de aceitação da Fatia W.
+- **Materialização:** Declaração explícita de homologação registrada no PR ou na issue (ex: *"Fatia W0.1 aceita formalmente"*). Precede obrigatoriamente a integração.
+
+### Pilar 3: Mecanismo de Aprovação de Pull Request na Plataforma GitHub
+- **Regra Nativa da Plataforma:** O GitHub bloqueia categoricamente autores de aprovarem seus próprios Pull Requests (*"Pull request authors cannot approve their own pull requests"*).
+- **Análise de Contexto:** Quando o PO (`hallanbrito`) é o próprio autor do PR (ou quando ferramentas agênticas submetem PRs autenticadas via credenciais/CLI do PO), configurar `required_approving_review_count: 1` no GitHub impede o merge legítimo pela própria interface, forçando o uso indevido de bypass.
+- **Diretriz de Configuração do Ruleset:**
+  - **Configuração Recomendada (Mantenedor Único / Autor-PO):**
+    - Configurar `required_approving_review_count: 0`.
+    - Manter exigência estrita de Pull Request (bloqueia push direto na `main`).
+    - Exigir resolução obrigatória de tópicos de revisão (`required_review_thread_resolution: true`).
+    - Exigir **Status Check Obrigatório** verde (`Django Checks & Pytest (Python 3.12)`).
+    - O controle humano do PO é garantido pelo ato soberano de autorizar e acionar o botão de merge do PR, mantendo o processo 100% auditável sem exigir bypass.
+  - **Configuração Alternativa (Multi-Ator / Bot Agêntico com Conta Própria):**
+    - Caso os agentes operem via GitHub App dedicada ou haja um segundo desenvolvedor humano cadastrado no repositório, `required_approving_review_count` pode ser configurado como `1`.
+
+### Pilar 4: Bypass Administrativo Excepcional
+- **Ator:** `Repository Admin` (PO Hallan).
+- **Natureza:** Mecanismo estritamente reservado para contingências críticas e recuperação de desastres (ex.: indisponibilidade do runner do GitHub Actions, necessidade urgente de hotfix de infraestrutura).
+- **Diretriz de Uso:** **Vedado como fluxo normal ou rotineiro de integração.** Qualquer utilização de bypass deve ser acompanhada de justificativa formal registrada no RUC e fica gravada no audit log da organização.
 
 ---
 
 ## 3. Especificação do Ruleset (JSON para Aplicação)
 
-Para aplicar este ruleset, o PO pode utilizar o comando abaixo via GitHub CLI após autorização formal:
+### Modelo Recomendado (Mantenedor Único / Autor-PO):
+Configuração que protege a `main`, exige PR e testes automatizados sem bloquear o autor-PO:
 
 ```bash
 gh api --method POST repos/hallanbrito/DriveHub-API/rulesets \
@@ -60,7 +77,7 @@ gh api --method POST repos/hallanbrito/DriveHub-API/rulesets \
     {
       "type": "pull_request",
       "parameters": {
-        "required_approving_review_count": 1,
+        "required_approving_review_count": 0,
         "dismiss_stale_reviews_on_push": true,
         "require_code_owner_review": false,
         "require_last_push_approval": false,
@@ -96,8 +113,10 @@ gh api --method POST repos/hallanbrito/DriveHub-API/rulesets \
 EOF
 ```
 
+> **Nota:** Caso o repositório passe a contar com conta agêntica autônoma (GitHub App) ou co-revisor técnico humano, alterar o parâmetro `"required_approving_review_count": 1` para habilitar a aprovação formal na interface do GitHub por terceiros.
+
 ---
 
 ## 4. Próximos Passos
-- Esta proposta é documental e não foi aplicada administrativamente pelo agente (em estrito cumprimento ao princípio da autorização administrativa).
-- Aguarda deliberação e aplicação manual pelo PO Hallan.
+- Esta proposta é de natureza estritamente documental e consultiva (CH-1 / CH-2 isolado), não tendo sido aplicada administrativamente pelo agente executor.
+- Aguarda deliberação e eventual aplicação manual pelo PO Hallan.
